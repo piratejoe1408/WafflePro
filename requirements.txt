@@ -1,0 +1,24 @@
+# FanTrigger runtime dependencies.
+#
+# Run FanTrigger.bat installs these automatically on first launch, so most
+# users don't need to use this file directly. It's here for the manual /
+# developer install path:
+#     python -m pip install -r requirements.txt
+
+# .NET interop, used to load LibreHardwareMonitorLib.dll and call into its
+# internal Ring0 class for embedded-controller I/O port access.
+pythonnet>=3.0
+
+# System tray icon framework + image generation for the per-icon CPU temp.
+pystray>=0.19
+Pillow>=10.0
+
+# Note: LibreHardwareMonitorLib.dll itself is NOT a pip package. It's a .NET
+# assembly downloaded from NuGet by Run FanTrigger.bat on first launch. If
+# you're setting up by hand, grab it from:
+#     https://www.nuget.org/packages/LibreHardwareMonitorLib/
+# and drop the DLL next to fan_trigger.py.
+
+# Optional: only required for the historical v1 keyboard diagnostic
+# (fan_diagnostic.py). The main utility and v2 diagnostic don't need it.
+# keyboard>=0.13

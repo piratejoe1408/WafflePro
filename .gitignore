@@ -1,0 +1,34 @@
+# Generated runtime artifacts — never commit these.
+*.log
+__pycache__/
+*.pyc
+*.pyo
+
+# LibreHardwareMonitorLib.dll is downloaded at runtime by Run FanTrigger.bat,
+# not redistributed in this repo. Excluding it keeps the repo small and
+# avoids any redistribution questions about LHM's MPL-2.0 license.
+LibreHardwareMonitorLib.dll
+HidSharp.dll
+lhm.zip
+lhm_extract/
+
+# Editor / OS noise
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+desktop.ini
+*.swp
+*.bak
+*~
+
+# Python virtualenvs (in case you set one up while developing)
+venv/
+.venv/
+env/
+.env/
+
+# PyInstaller (in case someone packages a .exe later)
+build/
+dist/
+*.spec
