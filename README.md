@@ -2,7 +2,7 @@
 
 > *This utility is designed for your brand new MSI waffle maker! It will help turning it into a mostly functioning computer that can run perpetually.*
 
-A very simple fan manager for MSI laptops. Turns max fan speed ON at 90 °C CPU and OFF at 80 °C, automatically. Designed on the **MSI Vector 16 HX A8WHG** — should work on most modern MSI laptops after some tuning. (MAKE SURE YOU HAVE DEDICATED KEYS FOR ACTIVATING THE FANS FOR 100% SPEED). If your laptop fans already speed up to 100% automatically - YOU DO NOT NEED THIS UTILITY.
+A very simple fan manager for MSI laptops. Turns max fan speed ON at 90 °C CPU and OFF at 80 °C, automatically. Designed on the **MSI Vector 16 HX A8WHG BIOS .107** — should work on most modern MSI laptops after some tuning. (MAKE SURE YOU HAVE DEDICATED KEYS FOR ACTIVATING THE FANS FOR 100% SPEED). If your laptop fans already speed up to 100% automatically - YOU DO NOT NEED THIS UTILITY.
 
 Background tray utility for Windows. Watches your CPU temperature and writes the Cooler Boost bit directly to your laptop's embedded controller — same effect as pressing FN+UpArrow yourself, but automatic and silent. Plays nice with MSI Center.
 
