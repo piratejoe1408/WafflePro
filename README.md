@@ -1,4 +1,4 @@
-# WafflePro_v1
+# WafflePro_v1      Discussion: https://t.me/+7LqpOW1mgOg5YjI0
 
 > *This utility is designed for your brand new MSI waffle maker! It will help turning it into a mostly functioning computer that can run perpetually.*
 
