@@ -30,39 +30,46 @@ The obvious approach — `SendInput`-style keystroke simulation — turned out t
 
 ---
 
-## Quick start (have Python? want to run it from source?)
+## Quick start
 
-1. Clone this repo or download as ZIP into a folder of your choice.
-2. **Right-click `Run EC Verify.bat` → Run as administrator.** This is the safety pre-flight (see [First-time setup](#first-time-setup)).
-3. If verification passes, **right-click `Run FanTrigger.bat` → Run as administrator**. A colored tray icon appears showing your live CPU temperature.
-4. *(Optional)* **Right-click `Install Autostart.bat` → Run as administrator** to launch WafflePro automatically at every login.
+> **Whatever model you're on, always start with `Run EC Verify.bat`.** Reason: WafflePro's default Cooler Boost register address (`0x98`, bit `0x80`) was discovered on the Vector 16 HX A8WHG. Other MSI models can use a different EC layout. The verify tool is the safe, non-destructive way to find out which case you're in before the auto-trigger ever runs.
 
-The first run installs Python (via `winget`) if needed, plus a few pip packages and one DLL — total ~50 MB, ~2 minutes. Subsequent runs are instant.
+1. **Get the code.** Clone this repo or download as ZIP into a folder of your choice (e.g. `C:\Users\You\Documents\WafflePro`).
+
+2. **Run the safety pre-flight.** Right-click **`Run EC Verify.bat`** → **Run as administrator**. It writes `0x83` to register `0x98`, waits 5 seconds, writes `0x03`, waits 5 more seconds, then restores the original value. **Listen with your ears.**
+
+   The first run also installs Python (via `winget`) if you don't have it, plus three pip packages and one DLL — total ~50 MB, ~2 minutes. Subsequent runs are instant.
+
+3. **Did the fans go LOUD then QUIET?**
+
+   ### ✅ YES — your model uses the same register layout. You're done with setup.
+   - Right-click **`Run FanTrigger.bat`** → **Run as administrator**. A colored icon appears in the tray showing your live CPU temperature.
+   - *(Optional)* Right-click **`Install Autostart.bat`** → **Run as administrator** to launch WafflePro automatically at every login.
+   - Skip the rest of this section.
+
+   ### ❌ NO (or anything weird) — your model uses a different EC register. Don't run `Run FanTrigger.bat` yet — port it first:
+
+   1. Right-click **`Run EC Discover.bat`** → **Run as administrator**.
+   2. Follow the prompts: it snapshots EC RAM 4 times while **you press FN+UpArrow by hand** between each snapshot to physically toggle Cooler Boost. Use your ears to confirm boost actually toggles each time.
+   3. When the analysis prints, look for a single **clean whole-byte candidate** where OFF and ON differ by exactly `0x80` (or another single power-of-two bit like `0x40`, `0x20`). That's your model's Cooler Boost register.
+   4. Open **`ec_control.py`** in Notepad. At the very top, update the two constants with your discovered values:
+      ```python
+      COOLER_BOOST_REG  = 0xXX   # your discovered register address
+      COOLER_BOOST_MASK = 0xYY   # your discovered bit mask (often 0x80)
+      ```
+   5. **Re-run `Run EC Verify.bat`** to confirm. Now the fans should go loud → quiet on cue.
+   6. Once verified, go back to the ✅ path and run `Run FanTrigger.bat`.
+   7. **Please open an issue** in this repo with your laptop model and discovered values — we'll add it to a built-in model database so future users with your hardware don't have to repeat the dance.
+
+   The discovery script only **reads** the EC during the four-snapshot dance. The verify script only writes values you literally just observed coming from your own button press, only to the address you discovered, and restores the original byte before exiting.
 
 ## Quick start (just want a one-click .exe?)
+
+> ⚠️ **The pre-built .exe assumes the Vector 16 HX A8WHG register layout.** If you're on a different MSI model, the .exe path won't work for you out of the box — you need the source-code path above so you can update `ec_control.py` with your discovered register, then optionally rebuild the .exe yourself with `build_exe.bat`.
 
 Grab the latest build from the [Releases](../../releases) page (a zip containing `WafflePro.exe` + `LibreHardwareMonitorLib.dll`), extract anywhere, then **right-click `WafflePro.exe` → Run as administrator**. No Python, no pip, no fuss.
 
 To make it auto-start without Python, create a Windows scheduled task pointing at the `.exe` with **Run with highest privileges** checked.
-
----
-
-## First-time setup
-
-> **Read this carefully if you're not on the exact tested model.**
-
-EC register layouts vary between MSI models and even between firmware revisions of the same model. Before trusting WafflePro to write to your EC, **verify** the register address actually matches the discovered one (`0x98`, bit `0x80`):
-
-1. **`Run EC Verify.bat`** (right-click → as admin). It writes `0x83` to register `0x98`, waits 5 seconds, writes `0x03`, waits 5 more seconds, then restores the original value. Listen with your ears.
-2. **Loud → quiet pattern matched** → register is correct, you're good to go.
-3. **No fan reaction** → your model uses a different register or bit. Run the full discovery tool:
-   - `Run EC Discover.bat` (right-click → as admin).
-   - Follow the prompts: it snapshots EC RAM 4 times while you toggle Cooler Boost by hand between each snapshot.
-   - The output identifies the byte that flips with state.
-   - Update `COOLER_BOOST_REG` and `COOLER_BOOST_MASK` at the top of `ec_control.py` with your discovered values.
-   - Re-run the verify tool to confirm.
-
-The discovery script only **reads** the EC during the dance. The verify script only writes the values you literally just observed coming from your own button press, only to the address you discovered, and restores the original byte before exiting.
 
 ---
 
@@ -140,22 +147,6 @@ WafflePro/
 │
 └── build_exe.bat              ← one-click PyInstaller build of WafflePro.exe
 ```
-
----
-
-## Porting to a different MSI model
-
-If `Run EC Verify.bat` doesn't make your fans react, you've got a different EC layout. Recipe:
-
-1. **Run `Run EC Discover.bat`** as admin. Follow the prompts (you'll press FN+UpArrow four times during the discovery dance).
-2. **Look for a single clean whole-byte candidate** with an OFF/ON pattern that differs by exactly `0x80` (or another single power-of-2 bit). That's the Cooler Boost register.
-3. **Update `ec_control.py`**:
-   ```python
-   COOLER_BOOST_REG  = 0xXX   # your discovered address
-   COOLER_BOOST_MASK = 0xYY   # your discovered bit mask (usually 0x80)
-   ```
-4. **Run `Run EC Verify.bat`** again to confirm before trusting the auto-trigger.
-5. **Open an issue** with your laptop model + the discovered values. We'll add it to a model database in `ec_control.py` so future users with your model don't have to repeat the dance.
 
 ---
 
